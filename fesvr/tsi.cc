@@ -2,10 +2,35 @@
 #include <cstdio>
 #include <cstdlib>
 
+#define SCR_BASE  0x110000
+
+#define SCR_BOOT 0x00
+
+#define SCR_SWITCHER 0x04
+
+#define SCR_HBWIF_RST 0x08
+#define SCR_BH_RST 0x0c
+#define SCR_RS_RST 0x10
+
+#define SCR_UNCORE_CLK_DIVISOR 0x20
+#define SCR_BH_CLK_DIVISOR 0x24
+#define SCR_RS_CLK_DIVISOR 0x28
+#define SCR_BH_OUT_CLK_DIVISOR 0x2c
+#define SCR_RS_OUT_CLK_DIVISOR 0x30
+#define SCR_LBWIF_CLK_DIVISOR 0x34
+
+#define SCR_UNCORE_PASS_CLK_SEL 0x50
+#define SCR_BH_PASS_CLK_SEL 0x54
+#define SCR_RS_PASS_CLK_SEL 0x58
+#define SCR_LBWIF_PASS_CLK_SEL 0x5c
+
 #define NHARTS_MAX 16
+
+#define MSIP_BASE 0x2000000
 
 void tsi_t::host_thread(void *arg)
 {
+
   tsi_t *tsi = static_cast<tsi_t*>(arg);
   tsi->run();
 
@@ -23,14 +48,21 @@ tsi_t::~tsi_t(void)
 {
 }
 
-#define MSIP_BASE 0x2000000
-
 // Interrupt core 0 to make it start executing the program in DRAM
+void tsi_t::start_program()
+{
+  printf("TSI: Start program\n");
+  uint32_t one = 1;
+  write_chunk(MSIP_BASE, sizeof(uint32_t), &one);
+}
+
+// get cores/harts out of reset
 void tsi_t::reset()
 {
-  uint32_t one = 1;
+  printf("TSI: Reset\n");
 
-  write_chunk(MSIP_BASE, sizeof(uint32_t), &one);
+  write_scr(SCR_BASE + SCR_BH_RST, 0);
+  write_scr(SCR_BASE + SCR_RS_RST, 0);
 }
 
 void tsi_t::push_addr(addr_t addr)

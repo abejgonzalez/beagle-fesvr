@@ -31,8 +31,21 @@ class tsi_t : public htif_t
   bool out_ready() { return true; }
   void tick(bool out_valid, uint32_t out_bits, bool in_ready);
 
+  // helper method to more easily write SCRs
+  void write_scr(addr_t taddr, uint32_t value) {
+    uint32_t value_loc = value;
+    write_chunk(taddr, sizeof(uint32_t), &value_loc);
+  }
+
+  uint32_t read_scr(addr_t taddr) {
+    uint32_t dest;
+    read_chunk(taddr, sizeof(uint32_t), &dest);
+    return dest;
+  }
+
  protected:
   void reset() override;
+  void start_program() override;
   void read_chunk(addr_t taddr, size_t nbytes, void* dst) override;
   void write_chunk(addr_t taddr, size_t nbytes, const void* src) override;
   void switch_to_target();

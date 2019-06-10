@@ -41,6 +41,7 @@ void memif_t::read(addr_t addr, size_t len, void* bytes)
 
 void memif_t::write(addr_t addr, size_t len, const void* bytes)
 {
+  printf("MEMIF: Write %ld bytes to 0x%lx\n", len, addr);
   size_t align = cmemif->chunk_align();
   if (len && (addr & (align-1)))
   {

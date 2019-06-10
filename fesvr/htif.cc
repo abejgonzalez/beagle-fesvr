@@ -76,14 +76,18 @@ htif_t::~htif_t()
 
 void htif_t::start()
 {
+  printf("HTIF: Start\n");
+  reset();
+
   if (!targs.empty() && targs[0] != "none")
       load_program();
 
-  reset();
+  start_program();
 }
 
 void htif_t::load_program()
 {
+  printf("HTIF: Load program\n");
   std::string path;
   if (access(targs[0].c_str(), F_OK) == 0)
     path = targs[0];
@@ -169,6 +173,7 @@ void htif_t::clear_chunk(addr_t taddr, size_t len)
 
 int htif_t::run()
 {
+  printf("HTIF: Run\n");
   start();
 
   auto enq_func = [](std::queue<reg_t>* q, uint64_t x) { q->push(x); };
