@@ -61,8 +61,15 @@ void tsi_t::reset()
 {
   printf("TSI: Reset\n");
 
+  // Need to ensure that the uncore is out of reset before sending this
+  //in_data.push_back(0xDEADBEEF); // dummy value
+
+  printf("Bringing BOOM tile out of reset\n");
   write_scr(SCR_BASE + SCR_BH_RST, 0);
+  printf("Bringing Rocket tile out of reset\n");
   write_scr(SCR_BASE + SCR_RS_RST, 0);
+  printf("Bringing HBWIF out of reset\n");
+  write_scr(SCR_BASE + SCR_HBWIF_RST, 0);
 }
 
 void tsi_t::push_addr(addr_t addr)
@@ -83,6 +90,7 @@ void tsi_t::push_len(addr_t len)
 
 void tsi_t::read_chunk(addr_t taddr, size_t nbytes, void* dst)
 {
+  //printf("TSI: read: addr:0x%lx len:%ld\n", taddr, nbytes);
   uint32_t *result = static_cast<uint32_t*>(dst);
   size_t len = nbytes / sizeof(uint32_t);
 
@@ -100,6 +108,7 @@ void tsi_t::read_chunk(addr_t taddr, size_t nbytes, void* dst)
 
 void tsi_t::write_chunk(addr_t taddr, size_t nbytes, const void* src)
 {
+  //printf("TSI: write: addr:0x%lx len:%ld\n", taddr, nbytes);
   const uint32_t *src_data = static_cast<const uint32_t*>(src);
   size_t len = nbytes / sizeof(uint32_t);
 
@@ -139,9 +148,13 @@ void tsi_t::switch_to_target(void)
 
 void tsi_t::tick(bool out_valid, uint32_t out_bits, bool in_ready)
 {
-  if (out_valid && out_ready())
+  if (out_valid && out_ready()) {
+    //printf("TSI: Tick: TRG -> HOST (%d)\n", out_data.size());
     out_data.push_back(out_bits);
+  }
 
-  if (in_valid() && in_ready)
+  if (in_valid() && in_ready) {
+    //printf("TSI: Tick: HOST -> TRG (%d)\n", in_data.size());
     in_data.pop_front();
+  }
 }
