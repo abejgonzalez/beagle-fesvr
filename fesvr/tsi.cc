@@ -61,9 +61,6 @@ void tsi_t::reset()
 {
   printf("TSI: Reset\n");
 
-  // Need to ensure that the uncore is out of reset before sending this
-  //in_data.push_back(0xDEADBEEF); // dummy value
-
   printf("Bringing BOOM tile out of reset\n");
   write_scr(SCR_BASE + SCR_BH_RST, 0);
   printf("Bringing Rocket tile out of reset\n");
