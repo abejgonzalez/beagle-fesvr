@@ -28,6 +28,10 @@
 
 #define MSIP_BASE 0x2000000
 
+#define HBWIF_LANE_CONFIG_BASE_0 0x4000000
+#define HBWIF_LANE_CONFIG_BASE_1 0x4010000
+#define MEM_MODE_ENABLE          0x20
+
 void tsi_t::host_thread(void *arg)
 {
 
@@ -67,6 +71,15 @@ void tsi_t::reset()
   write_scr(SCR_BASE + SCR_RS_RST, 0);
   printf("Bringing HBWIF out of reset\n");
   write_scr(SCR_BASE + SCR_HBWIF_RST, 0);
+
+  printf("Enabling HBWIF Lane0\n");
+  write_scr(HBWIF_LANE_CONFIG_BASE_0 + MEM_MODE_ENABLE, 1);
+
+  printf("Enabling HBWIF Lane1\n");
+  write_scr(HBWIF_LANE_CONFIG_BASE_1 + MEM_MODE_ENABLE, 1);
+
+  printf("Switch to using HBWIF\n");
+  write_scr(SCR_BASE + SCR_SWITCHER, 0);
 }
 
 void tsi_t::push_addr(addr_t addr)
